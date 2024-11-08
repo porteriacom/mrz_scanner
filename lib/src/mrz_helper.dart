@@ -1,7 +1,7 @@
 class MRZHelper {
   static List<String>? getFinalListToParse(List<String> ableToScanTextList) {
     if (ableToScanTextList.length < 2) {
-      // minimum length of any MRZ format is 2 lines
+      // Mínimo número de líneas de cualquier formato MRZ es 2
       return null;
     }
     int lineLength = ableToScanTextList.first.length;
@@ -9,12 +9,45 @@ class MRZHelper {
       if (e.length != lineLength) {
         return null;
       }
-      // to make sure that all lines are the same in length
+      // Para asegurarse de que todas las líneas tengan la misma longitud
     }
     List<String> firstLineChars = ableToScanTextList.first.split('');
-    List<String> supportedDocTypes = ['A', 'C', 'P', 'V', 'I'];
+    String firstLine = ableToScanTextList.first;
+
+    // Verificar si la primera línea comienza con 'INCHL' (DNI chileno)
+    if (firstLine.startsWith('INCHL')) {
+      return [...ableToScanTextList];
+    }
+
+    // Verificar si la primera línea comienza con 'IDARG' (DNI argentino)
+    if (firstLine.startsWith('IDARG')) {
+      return [...ableToScanTextList];
+    }
+
+    // Verificar si la primera línea comienza con 'IDMEX' (DNI Mexicano)
+    if (firstLine.startsWith('IDMEX')) {
+      return [...ableToScanTextList];
+    }
+    // Verificar si la primera línea comienza con 'IDFRA' (DNI Frances)
+    if (firstLine.startsWith('IDFRA')) {
+      return [...ableToScanTextList];
+    }
+
+    // Verificar si la primera línea comienza con 'IDESP' (DNI Español)
+    if (firstLine.startsWith('IDESP')) {
+      return [...ableToScanTextList];
+    }
+
+    List<String> supportedDocTypes = ['A', 'C', 'P', 'V', 'I', 'IN', 'ID'];
     String fChar = firstLineChars[0];
-    if (supportedDocTypes.contains(fChar)) {
+    String sChar = firstLineChars[1];
+
+    if ((sChar == '<' && supportedDocTypes.contains(fChar)) ||
+        ableToScanTextList.first.startsWith('INCHL') ||
+        ableToScanTextList.first.startsWith('IDARG') ||
+        ableToScanTextList.first.startsWith('IDMEX') ||
+        ableToScanTextList.first.startsWith('IDFRA') ||
+        ableToScanTextList.first.startsWith('IDESP')) {
       return [...ableToScanTextList];
     }
     return null;
@@ -24,20 +57,20 @@ class MRZHelper {
     String res = text.replaceAll(' ', '');
     List<String> list = res.split('');
 
-    // to check if the text belongs to any MRZ format or not
-    if (list.length != 44 && list.length != 30 && list.length != 36) {
+    // Para comprobar si el texto pertenece a algún formato MRZ
+    if (list.length < 30 || list.length > 44) {
       return '';
     }
 
     for (int i = 0; i < list.length; i++) {
       if (RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(list[i])) {
         list[i] = list[i].toUpperCase();
-        // to ensure that every letter is uppercase
+        // Para asegurarse de que todas las letras estén en mayúsculas
       }
       if (double.tryParse(list[i]) == null &&
           !(RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(list[i]))) {
         list[i] = '<';
-        // sometimes < sign not recognized well
+        // A veces el signo < no se reconoce bien
       }
     }
     String result = list.join('');
